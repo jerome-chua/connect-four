@@ -13,7 +13,7 @@ module.exports = merge(common, {
   module: {
     rules: [
       {
-        test: /\.(js|mjs|jsx)$/, // regex to see which files to run babel on
+        test: /\.(js|mjs|jsx)$/, // Regex to see which files to run Babel on.
         exclude: /node_modules/,
         use: {
           loader: require.resolve('babel-loader'),
@@ -26,7 +26,7 @@ module.exports = merge(common, {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      // name this file main, so that it does not get automatically requested as a static file
+      // Prevent automatically requested as a static file.
       filename: './main.html',
       template: path.resolve(__dirname, '..', 'src', 'main.html'),
     }),

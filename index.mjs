@@ -17,5 +17,5 @@ app.use(express.static('dist')); // Serve files stored in dist folder.
 bindRoutes(app);
 
 // Set Express to listen on the given port.
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3004;
 app.listen(PORT);
