@@ -18,6 +18,7 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       winner_id: {
+        // If null, means draw.
         allowNull: true,
         type: Sequelize.INTEGER,
       },

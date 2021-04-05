@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack --config webpack_conf/webpack.prod.js",
     "debug": "nodemon --inspect index.mjs",
-    "start": "node index.mjs",
+    "start": "npx nodemon index.mjs",
     "watch": "webpack --watch --config webpack_conf/webpack.dev.js"
   },
   "repository": {

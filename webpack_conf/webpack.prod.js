@@ -10,11 +10,11 @@ module.exports = merge(common, {
   mode: 'production',
   plugins: [
     new HtmlWebpackPlugin({
-      // name this file main, so that it does not get automatically requested as a static file
+      // Prevent auto-request as a static file.
       filename: 'main.html',
       inject: true,
       template: path.resolve(__dirname, '..', 'src', 'main.html'),
-      // a favicon can be included in the head. use this config to point to it
+      // Include favicon in the head.
       // favicon: resolve(__dirname, '..', 'src', 'favicon.png'),
       alwaysWriteToDisk: true,
     }),
@@ -22,7 +22,8 @@ module.exports = merge(common, {
   module: {
     rules: [
       {
-        test: /\.(js|mjs|jsx)$/, // regex to see which files to run babel on
+        // Regex for which files to run Babel on.
+        test: /\.(js|mjs|jsx)$/,
         use: {
           loader: 'babel-loader',
           options: {
