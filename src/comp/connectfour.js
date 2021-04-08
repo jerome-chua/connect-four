@@ -29,29 +29,14 @@ const getBottomRowIndex = (board, colIndex) => {
 
 const checkColNotFilled = (board, colIndex) => (board[NUM_ROWS - 1][colIndex] === 0);
 
-const checkWin = (board, playerSymbol) => {
-  // Horizontal
-  for (let i = 0; i < board.length; i += 1) {
-    const row = board[i];
-    console.log(`Row ${i}: `, i);
-    for (let j = 0; j < row.length; j += 1) {
-      console.log('---');
-      console.log(`Col ${j}:`, j);
-    }
-  }
-  return false;
+const endGame = (playerOne, playerTwo) => {
+  const gameMsg = document.getElementById('player-msg');
 
-  // Vertical
-
-  // Diagonal
-};
-
-const endGame = (targetElement) => {
+  // if winner found
+  gameMsg.innerText = `GAME OVER! ${currentPlayerId} Won!`;
+  // else msg is Draw
   gameFinished = true;
-  targetElement.innerText = `${currentPlayerId} WON!`;
   canClick = false;
-
-  return gameFinished;
 };
 
 const togglePlayer = (playerOne, playerTwo) => {
@@ -84,11 +69,81 @@ const changeCircleColour = (currentId, playerOneId, evt) => {
   }
 };
 
+// const testBoard = [
+//   [2, 1, 2, 1, 2, 1, 2],
+//   [1, 2, 1, 2, 1, 2, 1],
+//   [1, 2, 2, 1, 1, 2, 2],
+//   [2, 1, 1, 2, 2, 1, 1],
+//   [1, 1, 2, 2, 2, 1, 1],
+//   [1, 2, 1, 2, 2, 1, 1],
+// ];
+
+const checkWin = (board, playerId) => {
+  // Horizontal
+  for (let i = (NUM_ROWS - 1); i > -1; i -= 1) {
+    let counter = 0;
+
+    for (let j = 0; j < NUM_COLS; j += 1) {
+      if (board[i][j] === playerId) {
+        counter += 1;
+
+        if (counter >= NUM_WIN) {
+          return true;
+        }
+      } else {
+        counter = 0;
+      }
+    }
+  }
+
+  // Vertical
+  for (let j = 0; j < NUM_COLS; j += 1) {
+    let counter = 0;
+
+    for (let i = 0; i < NUM_ROWS; i += 1) {
+      if (board[i][j] === playerId) {
+        counter += 1;
+
+        if (counter >= NUM_WIN) {
+          return true;
+        }
+      } else {
+        counter = 0;
+      }
+    }
+  }
+
+  // Diagonal (RTL)
+  for (let j = 0; j < (NUM_COLS - 3); j += 1) {
+    for (let i = NUM_ROWS - 4; i > -1; i -= 1) {
+      // eslint-disable-next-line max-len
+      if ((board[i][j] === playerId) && (board[i + 1][j + 1] === playerId) && (board[i + 2][j + 2] === playerId) && (board[i + 3][j + 3] === playerId)) {
+        console.log('problem solved');
+        return true;
+      }
+    }
+  }
+
+  // Diagonal (LTR)
+  for (let j = 0; j < (NUM_COLS - 3); j += 1) {
+    for (let i = NUM_ROWS - 1; i > 2; i -= 1) {
+      // eslint-disable-next-line max-len
+      if ((board[i][j] === playerId) && (board[i - 1][j + 1] === playerId) && (board[i - 2][j + 2] === playerId) && (board[i - 3][j + 3] === playerId)) {
+        console.log('problem solved!! ');
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
 const circleClicked = (row, col, evt) => {
   if (checkColNotFilled) {
     const bottomRow = getBottomRowIndex(boardArr, col);
     boardArr[bottomRow][col] = currentPlayerId;
   }
+  const winnerFound = checkWin(boardArr, currentPlayerId);
+  // const winnerFound = false;
 
   const boardData = {
     boardState: boardArr,
@@ -101,8 +156,6 @@ const circleClicked = (row, col, evt) => {
     .put(`/updategame/${gameId}`, boardData)
     .then((res) => {
       const { data } = res;
-      const winnerFound = checkWin(boardArr, currentPlayerId); // Need to update this.
-      // const winnerFound = false;
 
       changeCircleColour(currentPlayerId, data.players['1'].id, evt);
 
