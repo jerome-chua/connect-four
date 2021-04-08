@@ -7,21 +7,25 @@ import renderConnectFourPage from './comp/connectfour.js';
 
 import './styles.scss';
 
-// Login Page -----
-// Render only if no cookie id, else render Lobby page.
-renderLoginPage();
+// Create helper function to connect game to index.js.
+const readyForGame = (gameInfo) => {
+  renderConnectFourPage(gameInfo); // Render connect 4 page.
+};
 
-// Game Page -----
-// const playBtnCb = async (e) => {
-//   // Move to connect four game page.
-//   const getLobbyPage = document.getElementById('lobby-page');
-//   getLobbyPage.remove();
+const renderLoginOrLobby = () => {
+  axios
+    .get('/checkiflogin')
+    .then((res) => {
+      console.log('my response', res);
 
-//   const opponentId = e.target.id;
-//   axios.post(`/creategame/:${opponentId}`);
-
-//   renderConnectFourPage();
-// };
+      if (res.data === 'LOBBY_PAGE') {
+        renderLobbyPage(readyForGame);
+      } else {
+        renderLoginPage(userAuthRenderLobby);
+      }
+    })
+    .catch((err) => console.log('loginorlobby error \n', err));
+};
 
 const userAuthRenderLobby = () => {
   const emailFormData = document.getElementById('email-input').value;
@@ -32,6 +36,7 @@ const userAuthRenderLobby = () => {
     password: getHash(passwordFormData),
   };
 
+  // Upon login success.
   axios
     .post('/login', loginFormData)
     .then((res) => {
@@ -40,14 +45,15 @@ const userAuthRenderLobby = () => {
         loginPage.remove();
 
         // If user log in success, render Lobby page.
-        renderLobbyPage();
+        // Within lobby.js, we have continuation to game page (with createGame data).
+        renderLobbyPage(readyForGame);
       } else {
-        renderLoginPage();
+        console.log('login running');
+        renderLoginPage(userAuthRenderLobby);
       }
     })
     .catch((err) => console.log('/login error', err));
 };
 
-// Also work on lobby page showing other users than the person logged in.
-const loginSubmitBtn = document.getElementById('login-submit');
-loginSubmitBtn.addEventListener('click', userAuthRenderLobby);
+// Login/Lobby Page depending if user logged in -----
+renderLoginOrLobby();

@@ -18,9 +18,38 @@ export default function initUsersController(db) {
         res.send('SUCCESS');
         return;
       }
-      res.send('FAILURE');
+      res.status(500).send({
+        error: 'Login Failure',
+      });
     } catch (err) {
       console.log('ERROR! in login... ---\n', err);
+    }
+  };
+
+  const checkIfLogin = async (req, res) => {
+    const { userId } = req.cookies;
+
+    // If COOKIE ID NOT FOUND, RENDER LOGIN PAGE.
+    if (!userId) {
+      res.send('LOGIN_PAGE');
+      return;
+    }
+
+    try {
+      const loggedInUser = await db.User.findOne({
+        where: {
+          id: Number(userId),
+        },
+      });
+
+      // If SQL QUERY IS SUCCESFUL, RENDER LOBBY PAGE ELSE RENDER LOGIN PAGE.
+      if (loggedInUser) {
+        res.send('LOBBY_PAGE');
+        return;
+      }
+      res.send('LOGIN_PAGE');
+    } catch (err) {
+      console.log('checkiflogin Error: ----- \n\n', err);
     }
   };
 
@@ -45,6 +74,8 @@ export default function initUsersController(db) {
   const allOtherUsers = async (req, res) => {
     const { userId } = req.cookies;
 
+    // 1st option: User eager loading to get games + users.
+
     try {
       const getUsers = await db.User.findAll({
         where: {
@@ -53,8 +84,10 @@ export default function initUsersController(db) {
           },
         },
       });
-      console.log('getUsers ----', getUsers);
+
       res.send(getUsers);
+
+      // 2nd option: Have 2 tables, 1 for new game, 1 for in game.
     } catch (err) {
       console.log('allOtherUsers error ----', err);
     }
@@ -76,6 +109,7 @@ export default function initUsersController(db) {
 
   return {
     login,
+    checkIfLogin,
     logout,
     allOtherUsers,
     leaderboard,

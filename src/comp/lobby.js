@@ -5,7 +5,7 @@ import {
 import { playerListComp } from './leaderboard.js';
 import setManyAttributes from '../helper/htmlHelpers.js';
 
-export default function renderLobbyPage() {
+export default function renderLobbyPage(readyForGame) {
   // Lobby Page -----
   const lobbyContainer = document.createElement('div');
   lobbyContainer.setAttribute('id', 'lobby-page');
@@ -19,8 +19,26 @@ export default function renderLobbyPage() {
   startConnectingTitle.innerText = "Let's start connecting!";
   startConnectingTitle.classList.add('text-center', 'lead');
 
+  // Game Page -----
+  const playBtnCb = (e) => {
+    const opponentId = e.target.id;
+
+    // Remove Lobby & render Game page after response received.
+    axios
+      .get(`/creategame/${opponentId}`)
+      // Move to connect four game page, only when game data confirmed received.
+      .then((res) => {
+        console.log('Lobby Page /creategame/opponentid result: ---', res);
+        lobbyContainer.remove();
+
+        // Pass data from games.mjs & render connect4 page.
+        readyForGame(res);
+        // renderConnectFourPage();
+      });
+  };
+
   // Game List playBtn (w event listener)
-  const playBtnCell = (uniqueIdentifier, callback) => {
+  const playBtnCell = (uniqueIdentifier) => {
     const tableData = document.createElement('td');
 
     const playBtn = document.createElement('button');
@@ -32,7 +50,7 @@ export default function renderLobbyPage() {
     });
 
     playBtn.innerText = 'PLAY';
-    playBtn.addEventListener('click', callback);
+    playBtn.addEventListener('click', playBtnCb);
     tableData.appendChild(playBtn);
 
     return tableData;
@@ -61,8 +79,8 @@ export default function renderLobbyPage() {
           const gameListTableBodyUsername = document.createElement('td');
           gameListTableBodyUsername.innerText = player.username;
 
-          // player.username is passed in to set playBtn's `id` attr.
-          const gameListTableBodyPlay = playBtnCell(player.username);
+          // player.id is passed in to set playBtn's `id` attr.
+          const gameListTableBodyPlay = playBtnCell(player.id);
 
           // eslint-disable-next-line max-len
           gameListTableBodyRow.append(gameListTableBodyIndex, gameListTableBodyUsername, gameListTableBodyPlay);

@@ -12,8 +12,13 @@ export default function bindRoutes(app) {
   });
 
   app.post('/login', UsersController.login);
+  // app.put('/logout', UsersController.logout);
+  app.get('/checkiflogin', UsersController.checkIfLogin);
   app.get('/users', UsersController.allOtherUsers);
   app.get('/leaderboard', UsersController.leaderboard);
+
   app.get('/lobby', GamesController.lobby);
-  app.post('/creategame/:opponentId', GamesController.createGame);
+  app.get('/creategame/:opponentId', GamesController.createGame);
+  app.put('/updategame/:gameId', GamesController.updateGame);
+  app.get('/rejoingame/:gameId', GamesController.rejoinGame);
 }

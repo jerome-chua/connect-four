@@ -1,6 +1,6 @@
 import setManyAttributes from '../helper/htmlHelpers.js';
 
-export default function renderLoginPage() {
+export default function renderLoginPage(userAuthRenderLobby) {
   const loginContainer = document.createElement('div');
   loginContainer.setAttribute('id', 'login-page');
   loginContainer.classList.add('container', 'w-75');
@@ -64,6 +64,9 @@ export default function renderLoginPage() {
     id: 'login-submit',
     type: 'button',
   });
+  // debugger;
+  console.log('loginsubmitbtn bananana: ----', userAuthRenderLobby);
+  loginSubmitBtn.addEventListener('click', (userAuthRenderLobby));
 
   emailFormGrp.append(emailLabel, emailInput, emailSmall);
   passwordFormGrp.append(passwordLabel, passwordBreak, passwordInput);
@@ -72,10 +75,6 @@ export default function renderLoginPage() {
   loginRow.appendChild(loginCol);
   loginContainer.append(loginTitle, welcomeBack);
   loginContainer.appendChild(loginRow);
-
-  // Append to <body>.
-  // document.body.appendChild(loginTitle);
-  // document.body.appendChild(welcomeBack);
 
   document.body.appendChild(loginContainer);
 }

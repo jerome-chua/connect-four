@@ -1,3 +1,21 @@
 body {
   background-color: rgb(158, 254, 222);
 }
+
+#blue-board {
+  background-color: rgb(8, 78, 255);
+  border-radius: 5px;
+  width: 700px;
+  height: 600px;
+  box-shadow: 12px 12px 12px 1px rgba(0, 0, 255, 0.064);
+  padding: 1rem;
+}
+
+.circle {
+  width: 92px;
+  height: 92px;
+  background-color: rgb(158, 254, 222);
+  border: 0.5px solid black;
+  border-radius: 50%;
+  box-shadow: inset 2px 2px rgba(0, 0, 0, 0.4);
+}
