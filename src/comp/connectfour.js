@@ -32,8 +32,11 @@ const checkColNotFilled = (board, colIndex) => (board[NUM_ROWS - 1][colIndex] ==
 const endGame = (playerOne, playerTwo) => {
   const gameMsg = document.getElementById('player-msg');
 
-  // if winner found
-  gameMsg.innerText = `GAME OVER! ${currentPlayerId} Won!`;
+  if (currentPlayerId == playerOne) {
+    gameMsg.innerText = 'GAME OVER! Player One WINS!';
+  } else if (currentPlayerId == playerTwo) {
+    gameMsg.innerText = 'GAME OVER! Player Two WINS!';
+  }
   // else msg is Draw
   gameFinished = true;
   canClick = false;
@@ -134,7 +137,24 @@ const checkWin = (board, playerId) => {
       }
     }
   }
+
   return false;
+};
+
+const checkDraw = (board) => {
+  const finalRow = board[0];
+
+  finalRow.forEach((ele) => {
+    if (ele !== 0) {
+      return true;
+    }
+  });
+  return false;
+};
+
+const drawGame = () => {
+  const gameMsg = document.getElementById('player-msg');
+  gameMsg.innerText = 'DRAW! Winner not found.';
 };
 
 const circleClicked = (row, col, evt) => {
@@ -142,8 +162,9 @@ const circleClicked = (row, col, evt) => {
     const bottomRow = getBottomRowIndex(boardArr, col);
     boardArr[bottomRow][col] = currentPlayerId;
   }
+
   const winnerFound = checkWin(boardArr, currentPlayerId);
-  // const winnerFound = false;
+  const gameDraw = checkDraw(boardArr);
 
   const boardData = {
     boardState: boardArr,
@@ -156,16 +177,17 @@ const circleClicked = (row, col, evt) => {
     .put(`/updategame/${gameId}`, boardData)
     .then((res) => {
       const { data } = res;
+      const playerOneId = data.players['1'].id;
+      const playerTwoId = data.players['2'].id;
 
-      changeCircleColour(currentPlayerId, data.players['1'].id, evt);
+      changeCircleColour(currentPlayerId, playerOneId, evt);
 
       if (winnerFound || winnerFound === null) {
-        // Call axios.put() again to get gameFinished & winnerId back into database.
-        console.log('Winner found!');
-        endGame();
-      }
-      else {
-        togglePlayer(data.players['1'].id, data.players['2'].id); // Change currentPlayerId.
+        endGame(playerOneId, playerTwoId);
+      } else if (gameDraw) {
+        drawGame();
+      } else {
+        togglePlayer(playerOneId, playerTwoId);
       }
     })
     .catch((err) => {
