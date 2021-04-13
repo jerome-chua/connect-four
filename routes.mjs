@@ -15,10 +15,12 @@ export default function bindRoutes(app) {
   // app.put('/logout', UsersController.logout);
   app.get('/checkiflogin', UsersController.checkIfLogin);
   app.get('/users', UsersController.allOtherUsers);
+  app.get('/usergames', UsersController.userGames);
   app.get('/leaderboard', UsersController.leaderboard);
 
   app.get('/lobby', GamesController.lobby);
   app.get('/creategame/:opponentId', GamesController.createGame);
+  // app.get('/checkingame', GamesController.getAll);
   app.put('/updategame/:gameId', GamesController.updateGame);
   app.get('/rejoingame/:gameId', GamesController.rejoinGame);
 }

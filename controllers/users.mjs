@@ -74,23 +74,37 @@ export default function initUsersController(db) {
   const allOtherUsers = async (req, res) => {
     const { userId } = req.cookies;
 
-    // 1st option: User eager loading to get games + users.
-
     try {
-      const getUsers = await db.User.findAll({
+      const getGameUsers = await db.User.findAll({
         where: {
           id: {
             [Op.not]: Number(userId),
           },
         },
+        include: {
+          model: db.Game,
+        },
       });
 
-      res.send(getUsers);
-
-      // 2nd option: Have 2 tables, 1 for new game, 1 for in game.
+      res.send(getGameUsers);
     } catch (err) {
       console.log('allOtherUsers error ----', err);
     }
+  };
+
+  const userGames = async (req, res) => {
+    const { userId } = req.cookies;
+
+    const user = await db.User.findOne({
+      where: {
+        id: userId,
+      },
+    });
+
+    const getUserGame = await user.getGames();
+    // const gameId = getUserGame[0].dataValues.id;
+
+    res.send(getUserGame);
   };
 
   const leaderboard = async (req, res) => {
@@ -112,6 +126,7 @@ export default function initUsersController(db) {
     checkIfLogin,
     logout,
     allOtherUsers,
+    userGames,
     leaderboard,
   };
 }

@@ -16,8 +16,6 @@ const renderLoginOrLobby = () => {
   axios
     .get('/checkiflogin')
     .then((res) => {
-      console.log('my response', res);
-
       if (res.data === 'LOBBY_PAGE') {
         renderLobbyPage(readyForGame);
       } else {
@@ -48,12 +46,11 @@ const userAuthRenderLobby = () => {
         // Within lobby.js, we have continuation to game page (with createGame data).
         renderLobbyPage(readyForGame);
       } else {
-        console.log('login running');
         renderLoginPage(userAuthRenderLobby);
       }
     })
     .catch((err) => console.log('/login error', err));
 };
 
-// Login/Lobby Page depending if user logged in -----
+// Login/Lobby Page depending if user logged in.
 renderLoginOrLobby();

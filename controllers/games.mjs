@@ -40,7 +40,6 @@ export default function initGamesController(db) {
       };
 
       const game = await db.Game.create(newGameData);
-      console.log('createGame executed! ----');
 
       // Find players in User model so as to create rows in join table.
       const playerOne = await db.User.findOne({
@@ -59,7 +58,7 @@ export default function initGamesController(db) {
       await game.addUser(playerOne);
       await game.addUser(playerTwo);
 
-      res.send({
+      const dataObj = {
         id: game.id,
         players: {
           1: {
@@ -71,10 +70,14 @@ export default function initGamesController(db) {
             username: playerTwo.username,
           },
         },
-        playerIdTurn: playerStartId,
-        boardState: game.board_state,
+        playeridTurn: playerStartId,
+        boardState: game.boardState,
         gameFinished: false,
-      });
+      };
+
+      // Create a function to return the object inside res.send()
+      // Instead of typing out everything.
+      res.send(dataObj);
     } catch (err) {
       console.log('db.Game.createGame err: ---', err);
     }
@@ -83,6 +86,7 @@ export default function initGamesController(db) {
   // When board is updated, currentplayer turn should be updated.
   const updateGame = async (req, res) => {
     const { gameId } = req.params;
+    const { boardState } = req.body;
 
     try {
       const game = await db.Game.findOne({
@@ -90,6 +94,10 @@ export default function initGamesController(db) {
           id: Number(gameId),
         },
       });
+
+      // Save boardState here.
+      game.boardState = boardState;
+      game.save();
 
       const gameUsers = await game.getUsers();
 
@@ -100,8 +108,6 @@ export default function initGamesController(db) {
           },
         },
       });
-
-      console.log('game.getUsers done. \n ------- \n');
 
       res.send({
         id: game.id,
@@ -115,8 +121,8 @@ export default function initGamesController(db) {
             username: gameUsers[1].username,
           },
         },
-        playerIdTurn: toggleNextPlayer.id,
-        boardState: game.board_state,
+        playeridTurn: toggleNextPlayer.id,
+        boardState: game.boardState,
         gameFinished: false,
       });
     } catch (err) {
@@ -124,11 +130,59 @@ export default function initGamesController(db) {
     }
   };
 
-  // After button changed from 'Start Game' to 'Continue'.
+  // After button changed from 'Start Game' to 'Rejoin'.
   const rejoinGame = async (req, res) => {
     const { gameId } = req.params;
 
-    console.log(gameId);
+    try {
+      const game = await db.Game.findOne({
+        where: {
+          id: gameId,
+        },
+      });
+
+      // Get the users from the gameId too.
+      const getPlayers = await game.getUsers();
+
+      // Player one is the player that initiated the game.
+      const playerUsernames = getPlayers.map((player) => player.username);
+
+      const playerIds = getPlayers.map((player) => player.id);
+
+      const players = {
+        players: {
+          1: {
+            id: playerIds[0],
+            username: playerUsernames[0],
+          },
+          2: {
+            id: playerIds[1],
+            username: playerUsernames[1],
+          },
+        },
+      };
+
+      const dataObj = { ...game, ...players };
+
+      res.send({
+        id: dataObj.dataValues.id,
+        players: {
+          1: {
+            id: dataObj.players['1'].id,
+            username: dataObj.players['1'].username,
+          },
+          2: {
+            id: dataObj.players['2'].id,
+            username: dataObj.players['2'].username,
+          },
+        },
+        playeridTurn: dataObj.dataValues.playeridTurn,
+        boardState: dataObj.dataValues.boardState,
+        gameFinished: false,
+      });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return {

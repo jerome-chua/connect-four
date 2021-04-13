@@ -1,0 +1,32 @@
+Technical Review
+
+    What part of the project went well, technically? Give at least one link to your repo as an example.
+
+    How data flowed & how the code is easily seperable, I can work on different things without worrying about how they might break up other pieces. Eg. readyForGame(gameInfo) function
+
+
+    What part the project was a struggle, technically? Give at least one link to your repo as an example.
+
+    Generally my understanding of Axios & Express and differentiating them was giving me most of my technical trouble. I also got stuck on the game/winning logic for 2 days.
+
+    What technical adjustments would you make for the next project? Why?
+
+    Would have worked directly on the MVP & start with the Sign in page so I could get a rough feel of how the user data would be passed into the lobby page & how games would then be set up accordingly. 
+
+Process Review
+
+    What in the approach and process during this project went well?
+
+    Probably because of the MVC/Webpack framework, code is much easier to dissect and find where the problem lies, it is a double-edged sword though as I need more screen real-estate.
+
+    What in the approach and process during this project did not go well?
+
+    Feel disappointed in the overall result of my project. Felt it was sub-par. I was struggling the week prior to understand axios/express and their interaction fully, perhaps I could have re-do the previous exercises again before working on my project.
+
+    What would you change in your process and approach in the next project? Why?
+
+    I would spend more time with instructor(s) to clarify as much as they would be willing to before starting on the project.
+
+    Again, I understand better now how important it is to get the MVP done first. 
+    My MVP would be: Login -> Lobby (without leaderbord) -> Game -> Game Logic -> Ability to rejoin Games.
+

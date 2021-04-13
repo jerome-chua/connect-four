@@ -1,17 +1,10 @@
-/* eslint-disable no-use-before-define */
 import axios from 'axios';
-
-const initBoardArr = (numRows, numCols) => {
-  const emptyBoard = Array.from(Array(numRows), () => new Array(numCols).fill(0));
-
-  return emptyBoard;
-};
 
 // Globals.
 const NUM_WIN = 4;
 const NUM_ROWS = 6;
 const NUM_COLS = 7;
-const boardArr = initBoardArr(NUM_ROWS, NUM_COLS);
+let boardArr;
 
 let canClick = true;
 let gameFinished = false;
@@ -168,7 +161,7 @@ const circleClicked = (row, col, evt) => {
 
   const boardData = {
     boardState: boardArr,
-    playerIdTurn: currentPlayerId,
+    playeridTurn: currentPlayerId,
     gameFinished: false, // To change later after checkWin() done.
     winnerId: undefined,
   };
@@ -195,9 +188,11 @@ const circleClicked = (row, col, evt) => {
     });
 };
 
-const createBoardElements = (board) => {
+const createBoardElements = (board, playerOneId, playerTwoId) => {
   const tableEle = document.createElement('table');
   tableEle.setAttribute('id', 'board-table');
+
+  console.log('SIGH BOARD::-----', board);
 
   for (let i = 0; i < board.length; i += 1) {
     const tableRow = board[i];
@@ -206,6 +201,13 @@ const createBoardElements = (board) => {
     for (let j = 0; j < tableRow.length; j += 1) {
       const circleEle = document.createElement('td');
       circleEle.classList.add('circle');
+
+      if (board[i][j] === playerOneId) {
+        circleEle.style.backgroundColor = 'red';
+      } else if (board[i][j] === playerTwoId) {
+        circleEle.style.backgroundColor = 'yellow';
+      }
+
       circleEle.addEventListener('click', (e) => {
         circleClicked(i, j, e); // Definitions: i:row, j:col, e:event.
       });
@@ -220,8 +222,13 @@ const createBoardElements = (board) => {
 export default function renderConnectFourPage(gameInfo) {
   // Gloabal Variables, data sent to page from '/login' route.
   const { data } = gameInfo;
+
+  console.log('Lets peek at the data!: ----', data);
+
   gameId = data.id;
-  currentPlayerId = data.playerIdTurn;
+  currentPlayerId = data.playeridTurn;
+  boardArr = data.boardState;
+
   const playerOneUserName = data.players['1'].username;
   const playerTwoUserName = data.players['2'].username;
 
@@ -242,7 +249,7 @@ export default function renderConnectFourPage(gameInfo) {
   gameMsg.classList.add('text-center');
 
   const playerMsg = document.createElement('h4');
-  playerMsg.innerText = `${data.players['1'].id === data.playerIdTurn ? playerOneUserName : playerTwoUserName} starts.`;
+  playerMsg.innerText = `${data.players['1'].id === data.playeridTurn ? playerOneUserName : playerTwoUserName} starts.`;
   playerMsg.setAttribute('id', 'player-msg');
   playerMsg.classList.add('text-center', 'lead');
 
@@ -286,7 +293,7 @@ export default function renderConnectFourPage(gameInfo) {
   playerTitleRow.append(playerOneCol, playerTwoCol);
 
   // Connect 4 board.
-  blueBoard.appendChild(createBoardElements(boardArr));
+  blueBoard.appendChild(createBoardElements(boardArr, data.players['1'].id, data.players['2'].id));
   boardCol.appendChild(blueBoard);
   boardRow.appendChild(boardCol);
 
