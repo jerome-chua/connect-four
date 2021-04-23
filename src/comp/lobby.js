@@ -88,30 +88,29 @@ export default function renderLobbyPage(readyForGame) {
       .get('/users')
       .then((res) => {
         const { playerInfo, userId } = res.data;
+
         let gameId;
-        let inGamePlayers;
-        let loggedInUserInGame;
         let numGames;
+        let inGamePlayers;
+        let loggedInUserInGame = false;
         let gameFinished = true;
 
         playerInfo.forEach((player, index) => {
           try {
-            const allGames = playerInfo[index].Games;
-            inGamePlayers = playerInfo[index].Games[0].players;
+            const allGames = player.Games;
+            numGames = allGames.length;
+
+            for (let i = 0; i < numGames; i += 1) {
+              inGamePlayers = allGames[i].players;
+              gameId = allGames[i].game_users.GameId;
+              gameFinished = allGames[i].gameFinished;
+            }
 
             loggedInUserInGame = !!inGamePlayers.includes(Number(userId));
-            console.log(`REAL inGamePlayers ${index}: ---`, playerInfo[index].Games);
-            numGames = playerInfo[index].Games.length;
-            gameId = allGames[0].game_users.GameId;
-            gameFinished = allGames[0].gameFinished;
           } catch (err) {
-            numGames = 0;
-            loggedInUserInGame = false;
-            console.log(`NUM GAMES!! for ${index}: --- `, numGames);
-            // console.log(`inGamePlayers ${index}: ---`, inGamePlayers);
-
             console.log((err instanceof TypeError));
           }
+
           const gameListTableBodyRow = document.createElement('tr');
           gameListTableBodyRow.setAttribute('id', `gamelist-tablerow-${index + 1}`);
           const gameListTableBodyIndex = document.createElement('th');
@@ -121,8 +120,9 @@ export default function renderLobbyPage(readyForGame) {
           gameListTableBodyUsername.innerText = player.username;
 
           let gameListTableBodyPlay;
+
           // Render either playBtn or rejoinBtn.
-          if (playerInfo[index].Games.length >= 1 && gameFinished === false && loggedInUserInGame) {
+          if (numGames >= 1 && loggedInUserInGame && gameFinished === false) {
             gameListTableBodyPlay = rejoinBtnCell(player.id, gameId);
           } else {
             gameListTableBodyPlay = playBtnCell(player.id);

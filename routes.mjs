@@ -20,7 +20,7 @@ export default function bindRoutes(app) {
 
   app.get('/lobby', GamesController.lobby);
   app.post('/creategame/:opponentId', GamesController.createGame);
-  // app.get('/checkingame', GamesController.getAll);
+  app.get('/refresh/:gameId', GamesController.refresh);
   app.put('/updategame/:gameId', GamesController.updateGame);
   app.get('/rejoingame/:gameId', GamesController.rejoinGame);
   app.get('/usergames', GamesController.userGames);

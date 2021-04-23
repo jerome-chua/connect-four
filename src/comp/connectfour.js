@@ -11,6 +11,15 @@ let gameFinished = false;
 let gameId;
 let currentPlayerId;
 
+// const testBoard = [
+//   [2, 1, 2, 1, 2, 1, 2],
+//   [1, 2, 1, 2, 1, 2, 1],
+//   [1, 2, 2, 1, 1, 2, 2],
+//   [2, 1, 1, 2, 2, 1, 1],
+//   [1, 1, 2, 2, 2, 1, 1],
+//   [1, 2, 1, 2, 2, 1, 1],
+// ];
+
 const getBottomRowIndex = (board, colIndex) => {
   for (let rowIndex = (NUM_ROWS - 1); rowIndex > -1; rowIndex -= 1) {
     if (board[rowIndex][colIndex] === 0) {
@@ -25,10 +34,10 @@ const checkColNotFilled = (board, colIndex) => (board[NUM_ROWS - 1][colIndex] ==
 const endGame = (playerOne, playerTwo) => {
   const gameMsg = document.getElementById('player-msg');
 
-  if (currentPlayerId == playerOne) {
-    gameMsg.innerText = 'GAME OVER! Player One WINS!';
-  } else if (currentPlayerId == playerTwo) {
-    gameMsg.innerText = 'GAME OVER! Player Two WINS!';
+  if (currentPlayerId == playerOne.id) {
+    gameMsg.innerText = `GAME OVER! ${playerOne.username} WINS!`;
+  } else if (currentPlayerId == playerTwo.id) {
+    gameMsg.innerText = `GAME OVER! ${playerTwo.username} WINS!`;
   }
   // else msg is Draw
   gameFinished = true;
@@ -38,13 +47,21 @@ const endGame = (playerOne, playerTwo) => {
 const togglePlayer = (playerOne, playerTwo) => {
   const gameMsg = document.getElementById('player-msg');
 
-  if (currentPlayerId == playerOne) {
-    currentPlayerId = playerTwo;
-    gameMsg.innerText = 'Player Two Turn';
+  if (currentPlayerId == playerOne.id) {
+    currentPlayerId = playerTwo.id;
+    gameMsg.innerText = `${playerTwo.username}'s turn`;
   } else {
-    currentPlayerId = playerOne;
-    gameMsg.innerText = 'Player One Turn';
+    currentPlayerId = playerOne.id;
+    gameMsg.innerText = `${playerOne.username}'s turn`;
   }
+
+  const boardData = {
+    playeridTurn: currentPlayerId,
+  };
+
+  axios.put(`/updategame/${gameId}`, boardData)
+    .then((res) => console.log(res))
+    .catch((err) => console.log('Error found within index.js /updategame', err));
 };
 
 const changeCircleColour = (currentId, playerOneId, evt) => {
@@ -64,15 +81,6 @@ const changeCircleColour = (currentId, playerOneId, evt) => {
     }
   }
 };
-
-// const testBoard = [
-//   [2, 1, 2, 1, 2, 1, 2],
-//   [1, 2, 1, 2, 1, 2, 1],
-//   [1, 2, 2, 1, 1, 2, 2],
-//   [2, 1, 1, 2, 2, 1, 1],
-//   [1, 1, 2, 2, 2, 1, 1],
-//   [1, 2, 1, 2, 2, 1, 1],
-// ];
 
 const checkWin = (board, playerId) => {
   // Horizontal
@@ -160,7 +168,6 @@ const circleClicked = (row, col, evt) => {
 
   const winnerFound = checkWin(boardArr, currentPlayerId);
   const gameDraw = checkDraw(boardArr);
-  console.log('gameFinished after last click', gameFinished);
 
   const boardData = {
     boardState: boardArr,
@@ -173,17 +180,16 @@ const circleClicked = (row, col, evt) => {
     .put(`/updategame/${gameId}`, boardData)
     .then((res) => {
       const { data } = res;
-      const playerOneId = data.players['1'].id;
-      const playerTwoId = data.players['2'].id;
-
-      changeCircleColour(currentPlayerId, playerOneId, evt);
+      const playerOne = data.players['1'];
+      const playerTwo = data.players['2'];
+      changeCircleColour(currentPlayerId, playerOne.id, evt);
 
       if (winnerFound || winnerFound === null) {
-        endGame(playerOneId, playerTwoId);
+        endGame(playerOne, playerTwo);
       } else if (gameDraw) {
         drawGame();
       } else {
-        togglePlayer(playerOneId, playerTwoId);
+        togglePlayer(playerOne, playerTwo);
       }
     })
     .catch((err) => {
@@ -194,8 +200,6 @@ const circleClicked = (row, col, evt) => {
 const createBoardElements = (board, playerOneId, playerTwoId) => {
   const tableEle = document.createElement('table');
   tableEle.setAttribute('id', 'board-table');
-
-  console.log('SIGH BOARD::-----', board);
 
   for (let i = 0; i < board.length; i += 1) {
     const tableRow = board[i];
@@ -222,6 +226,19 @@ const createBoardElements = (board, playerOneId, playerTwoId) => {
   return tableEle;
 };
 
+const refreshCb = () => {
+  console.log('button clicked');
+
+  axios.get(`/refresh/${gameId}`)
+    .then((res) => {
+      const gamePage = document.getElementById('game-page');
+      gamePage.remove();
+
+      renderConnectFourPage(res);
+    })
+    .catch((err) => console.log(err));
+};
+
 export default function renderConnectFourPage(gameInfo) {
   // Gloabal Variables, data sent to page from '/login' route.
   const { data } = gameInfo;
@@ -244,6 +261,15 @@ export default function renderConnectFourPage(gameInfo) {
   const gameCol = document.createElement('div');
   gameCol.classList.add('col');
 
+  const refreshCol = document.createElement('div');
+  refreshCol.classList.add('col', 'd-flex', 'justify-content-center', 'mb-5');
+
+  const refreshBtn = document.createElement('button');
+  refreshBtn.setAttribute('type', 'submit');
+  refreshBtn.classList.add('btn', 'btn-warning', 'btn-lg', 'px-5');
+  refreshBtn.innerText = 'Refresh';
+  refreshBtn.addEventListener('click', refreshCb);
+
   const gameMsg = document.createElement('h1');
   gameMsg.setAttribute('id', 'game-msg');
   gameMsg.innerText = 'CONNECT 4';
@@ -251,16 +277,7 @@ export default function renderConnectFourPage(gameInfo) {
 
   const playerMsg = document.createElement('h4');
 
-  for (let i = 0; i < boardArr.length; i += 1) {
-    for (let j = 0; j < boardArr[i].length; j += 1) {
-      if (boardArr[i][j] === 0) {
-        playerMsg.innerText = `${data.players['1'].id === data.playeridTurn ? playerOneUserName : playerTwoUserName} starts.`;
-      } else {
-        playerMsg.innerText = `${data.players['1'].id === data.playeridTurn ? playerOneUserName : playerTwoUserName} turn.`;
-      }
-    }
-  }
-
+  playerMsg.innerText = `${data.playeridTurn == data.players['1'].id ? playerOneUserName : playerTwoUserName}'s turn`;
   playerMsg.setAttribute('id', 'player-msg');
   playerMsg.classList.add('text-center', 'lead');
 
@@ -303,11 +320,14 @@ export default function renderConnectFourPage(gameInfo) {
   playerTwoCol.append(playerTwoTitle, playerTwoName);
   playerTitleRow.append(playerOneCol, playerTwoCol);
 
+  // Refresh Button
+  refreshCol.appendChild(refreshBtn);
+
   // Connect 4 board.
   blueBoard.appendChild(createBoardElements(boardArr, data.players['1'].id, data.players['2'].id));
   boardCol.appendChild(blueBoard);
   boardRow.appendChild(boardCol);
 
-  gameContainer.append(gameTitleRow, playerTitleRow, boardRow);
+  gameContainer.append(gameTitleRow, playerTitleRow, boardRow, refreshCol);
   document.body.appendChild(gameContainer);
 }

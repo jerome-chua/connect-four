@@ -203,11 +203,53 @@ export default function initGamesController(db) {
     res.send({ gameInfo });
   };
 
+  const refresh = async (req, res) => {
+    const { gameId } = req.params;
+
+    try {
+      const game = await db.Game.findOne({
+        where: {
+          id: Number(gameId),
+        },
+      });
+
+      const gameUsers = await game.getUsers();
+
+      const toggleNextPlayer = await game.getUsers({
+        where: {
+          id: {
+            [Op.not]: game.playeridTurn,
+          },
+        },
+      });
+
+      res.send({
+        id: game.id,
+        players: {
+          1: {
+            id: gameUsers[0].id,
+            username: gameUsers[0].username,
+          },
+          2: {
+            id: gameUsers[1].id,
+            username: gameUsers[1].username,
+          },
+        },
+        playeridTurn: toggleNextPlayer.id,
+        boardState: game.boardState,
+        gameFinished: game.gameFinished,
+      });
+    } catch (err) {
+      console.log('Error in GamesController.refresh:----', err);
+    }
+  };
+
   return {
     lobby,
     createGame,
     updateGame,
     rejoinGame,
     userGames,
+    refresh,
   };
 }
