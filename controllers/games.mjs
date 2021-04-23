@@ -35,6 +35,7 @@ export default function initGamesController(db) {
     try {
       const newGameData = {
         boardState: emptyBoard,
+        players,
         gameFinished: false,
         playeridTurn: playerStartId,
       };
@@ -86,7 +87,7 @@ export default function initGamesController(db) {
   // When board is updated, currentplayer turn should be updated.
   const updateGame = async (req, res) => {
     const { gameId } = req.params;
-    const { boardState } = req.body;
+    const { boardState, gameFinished, playeridTurn } = req.body;
 
     try {
       const game = await db.Game.findOne({
@@ -97,6 +98,8 @@ export default function initGamesController(db) {
 
       // Save boardState here.
       game.boardState = boardState;
+      game.gameFinished = gameFinished;
+      game.playeridTurn = playeridTurn;
       game.save();
 
       const gameUsers = await game.getUsers();
@@ -123,7 +126,7 @@ export default function initGamesController(db) {
         },
         playeridTurn: toggleNextPlayer.id,
         boardState: game.boardState,
-        gameFinished: false,
+        gameFinished: game.gameFinished,
       });
     } catch (err) {
       console.log('Error in GamesController.updateGame:----', err);
@@ -133,6 +136,7 @@ export default function initGamesController(db) {
   // After button changed from 'Start Game' to 'Rejoin'.
   const rejoinGame = async (req, res) => {
     const { gameId } = req.params;
+    // Where is the gameId coming from?
 
     try {
       const game = await db.Game.findOne({
@@ -185,10 +189,25 @@ export default function initGamesController(db) {
     }
   };
 
+  const userGames = async (req, res) => {
+    const { userId } = req.cookies;
+
+    const user = await db.User.findOne({
+      where: {
+        id: userId,
+      },
+    });
+
+    const gameInfo = await user.getGames();
+
+    res.send({ gameInfo });
+  };
+
   return {
     lobby,
     createGame,
     updateGame,
     rejoinGame,
+    userGames,
   };
 }

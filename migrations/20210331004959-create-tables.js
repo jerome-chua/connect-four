@@ -17,6 +17,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.INTEGER,
       },
+      players: {
+        type: Sequelize.JSON,
+      },
       winner_id: {
         // If null, means draw.
         allowNull: true,

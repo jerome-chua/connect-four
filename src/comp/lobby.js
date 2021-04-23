@@ -25,12 +25,10 @@ export default function renderLobbyPage(readyForGame) {
 
     // Remove Lobby & render Game page after response received.
     axios
-      .get(`/creategame/${opponentId}`)
+      .post(`/creategame/${opponentId}`)
       // Move to connect four game page, only when game data confirmed received.
       .then((res) => {
         lobbyContainer.remove();
-
-        console.log('First Res: --------\n', res);
 
         // Pass data from games.mjs & render connect4 page.
         readyForGame(res);
@@ -59,7 +57,6 @@ export default function renderLobbyPage(readyForGame) {
     const rejoinBtn = document.createElement('button');
     rejoinBtn.innerText = 'REJOIN';
     rejoinBtn.addEventListener('click', () => {
-      console.log('gameId', gameId);
       // Remove Lobby & render started Game page after response received.
       axios
         .get(`/rejoingame/${gameId}`)
@@ -88,48 +85,47 @@ export default function renderLobbyPage(readyForGame) {
     gameListTableBody.setAttribute('id', 'gamelist-body');
 
     axios
-      .get('/usergames')
+      .get('/users')
       .then((res) => {
-        console.log('lets check tha res.data', res.data);
-        return axios.get('/users');
-      })
-      .then((res) => {
-        const players = res.data;
-        console.log('response---,', res.data[1].Games[0].game_users.UserId);
-        // These "global" variables will effect for every iteration of the loop..
+        const { playerInfo, userId } = res.data;
         let gameId;
+        let inGamePlayers;
+        let loggedInUserInGame;
+        let numGames;
         let gameFinished = true;
 
-        // Append to each row a playBtn
-        players.forEach((player, index) => {
+        playerInfo.forEach((player, index) => {
           try {
-            // Need to update this GameId
-            gameId = res.data[index].Games[0].game_users.GameId;
-            gameFinished = res.data[index].Games[0].gameFinished;
+            const allGames = playerInfo[index].Games;
+            inGamePlayers = playerInfo[index].Games[0].players;
+
+            loggedInUserInGame = !!inGamePlayers.includes(Number(userId));
+            console.log(`REAL inGamePlayers ${index}: ---`, playerInfo[index].Games);
+            numGames = playerInfo[index].Games.length;
+            gameId = allGames[0].game_users.GameId;
+            gameFinished = allGames[0].gameFinished;
           } catch (err) {
+            numGames = 0;
+            loggedInUserInGame = false;
+            console.log(`NUM GAMES!! for ${index}: --- `, numGames);
+            // console.log(`inGamePlayers ${index}: ---`, inGamePlayers);
+
             console.log((err instanceof TypeError));
           }
-
           const gameListTableBodyRow = document.createElement('tr');
           gameListTableBodyRow.setAttribute('id', `gamelist-tablerow-${index + 1}`);
-
           const gameListTableBodyIndex = document.createElement('th');
           gameListTableBodyIndex.setAttribute('scope', 'row');
           gameListTableBodyIndex.innerText = index + 1;
-
           const gameListTableBodyUsername = document.createElement('td');
           gameListTableBodyUsername.innerText = player.username;
 
           let gameListTableBodyPlay;
-          console.log(`${index} Game finished???: ----,`, gameFinished);
-
-          if (res.data[index].Games.length === 0) {
-            // New Game. player.id is passed in to set playBtn's `id` attr.
-            gameListTableBodyPlay = playBtnCell(player.id);
-            // If more than 1 game exists, & current logged-in user is inside the game, then render
-            // 2nd option is to create a new axios route to only get games that have the req.cookies
-          } else if (res.data[index].Games.length >= 1) {
+          // Render either playBtn or rejoinBtn.
+          if (playerInfo[index].Games.length >= 1 && gameFinished === false && loggedInUserInGame) {
             gameListTableBodyPlay = rejoinBtnCell(player.id, gameId);
+          } else {
+            gameListTableBodyPlay = playBtnCell(player.id);
           }
           // eslint-disable-next-line max-len
           gameListTableBodyRow.append(gameListTableBodyIndex, gameListTableBodyUsername, gameListTableBodyPlay);

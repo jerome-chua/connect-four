@@ -18,6 +18,9 @@ export default function initGameModel(sequelize, DataTypes) {
         allowNull: false,
         type: DataTypes.INTEGER,
       },
+      players: {
+        type: DataTypes.JSON,
+      },
       winnerId: {
         allowNull: true,
         type: DataTypes.INTEGER,

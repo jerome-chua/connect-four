@@ -84,6 +84,7 @@ const checkWin = (board, playerId) => {
         counter += 1;
 
         if (counter >= NUM_WIN) {
+          gameFinished = true;
           return true;
         }
       } else {
@@ -101,6 +102,7 @@ const checkWin = (board, playerId) => {
         counter += 1;
 
         if (counter >= NUM_WIN) {
+          gameFinished = true;
           return true;
         }
       } else {
@@ -114,7 +116,7 @@ const checkWin = (board, playerId) => {
     for (let i = NUM_ROWS - 4; i > -1; i -= 1) {
       // eslint-disable-next-line max-len
       if ((board[i][j] === playerId) && (board[i + 1][j + 1] === playerId) && (board[i + 2][j + 2] === playerId) && (board[i + 3][j + 3] === playerId)) {
-        console.log('problem solved');
+        gameFinished = true;
         return true;
       }
     }
@@ -125,7 +127,7 @@ const checkWin = (board, playerId) => {
     for (let i = NUM_ROWS - 1; i > 2; i -= 1) {
       // eslint-disable-next-line max-len
       if ((board[i][j] === playerId) && (board[i - 1][j + 1] === playerId) && (board[i - 2][j + 2] === playerId) && (board[i - 3][j + 3] === playerId)) {
-        console.log('problem solved!! ');
+        gameFinished = true;
         return true;
       }
     }
@@ -158,11 +160,12 @@ const circleClicked = (row, col, evt) => {
 
   const winnerFound = checkWin(boardArr, currentPlayerId);
   const gameDraw = checkDraw(boardArr);
+  console.log('gameFinished after last click', gameFinished);
 
   const boardData = {
     boardState: boardArr,
     playeridTurn: currentPlayerId,
-    gameFinished: false, // To change later after checkWin() done.
+    gameFinished,
     winnerId: undefined,
   };
 
@@ -223,8 +226,6 @@ export default function renderConnectFourPage(gameInfo) {
   // Gloabal Variables, data sent to page from '/login' route.
   const { data } = gameInfo;
 
-  console.log('Lets peek at the data!: ----', data);
-
   gameId = data.id;
   currentPlayerId = data.playeridTurn;
   boardArr = data.boardState;
@@ -249,7 +250,17 @@ export default function renderConnectFourPage(gameInfo) {
   gameMsg.classList.add('text-center');
 
   const playerMsg = document.createElement('h4');
-  playerMsg.innerText = `${data.players['1'].id === data.playeridTurn ? playerOneUserName : playerTwoUserName} starts.`;
+
+  for (let i = 0; i < boardArr.length; i += 1) {
+    for (let j = 0; j < boardArr[i].length; j += 1) {
+      if (boardArr[i][j] === 0) {
+        playerMsg.innerText = `${data.players['1'].id === data.playeridTurn ? playerOneUserName : playerTwoUserName} starts.`;
+      } else {
+        playerMsg.innerText = `${data.players['1'].id === data.playeridTurn ? playerOneUserName : playerTwoUserName} turn.`;
+      }
+    }
+  }
+
   playerMsg.setAttribute('id', 'player-msg');
   playerMsg.classList.add('text-center', 'lead');
 

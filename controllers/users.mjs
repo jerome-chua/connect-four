@@ -86,25 +86,14 @@ export default function initUsersController(db) {
         },
       });
 
-      res.send(getGameUsers);
+      const gameinfo = {
+        playerInfo: getGameUsers,
+        userId,
+      };
+      res.send(gameinfo);
     } catch (err) {
       console.log('allOtherUsers error ----', err);
     }
-  };
-
-  const userGames = async (req, res) => {
-    const { userId } = req.cookies;
-
-    const user = await db.User.findOne({
-      where: {
-        id: userId,
-      },
-    });
-
-    const getUserGame = await user.getGames();
-    // const gameId = getUserGame[0].dataValues.id;
-
-    res.send(getUserGame);
   };
 
   const leaderboard = async (req, res) => {
@@ -126,7 +115,6 @@ export default function initUsersController(db) {
     checkIfLogin,
     logout,
     allOtherUsers,
-    userGames,
     leaderboard,
   };
 }
