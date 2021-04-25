@@ -215,14 +215,6 @@ export default function initGamesController(db) {
 
       const gameUsers = await game.getUsers();
 
-      const toggleNextPlayer = await game.getUsers({
-        where: {
-          id: {
-            [Op.not]: game.playeridTurn,
-          },
-        },
-      });
-
       res.send({
         id: game.id,
         players: {
@@ -235,7 +227,7 @@ export default function initGamesController(db) {
             username: gameUsers[1].username,
           },
         },
-        playeridTurn: toggleNextPlayer.id,
+        playeridTurn: game.playeridTurn,
         boardState: game.boardState,
         gameFinished: game.gameFinished,
       });

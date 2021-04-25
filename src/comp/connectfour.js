@@ -231,10 +231,16 @@ const refreshCb = () => {
 
   axios.get(`/refresh/${gameId}`)
     .then((res) => {
+      const { boardState } = res.data;
       const gamePage = document.getElementById('game-page');
       gamePage.remove();
 
       renderConnectFourPage(res);
+
+      const winnerFound = checkWin(boardState, res.data.playeridTurn);
+      if (winnerFound || winnerFound === null) {
+        endGame(res.data.players['1'], res.data.players['2']);
+      }
     })
     .catch((err) => console.log(err));
 };
