@@ -39,7 +39,7 @@ export default function renderLoginPage(userAuthRenderLobby) {
   const emailSmall = document.createElement('small');
   emailSmall.classList.add('form-text', 'text-muted');
   emailSmall.setAttribute('id', 'emailHelp');
-  emailSmall.innerText = 'Test login: jerome@test.com';
+  emailSmall.innerHTML = '';
 
   const passwordFormGrp = document.createElement('div');
   passwordFormGrp.classList.add('form-group', 'mt-3');

@@ -227,8 +227,6 @@ const createBoardElements = (board, playerOneId, playerTwoId) => {
 };
 
 const refreshCb = () => {
-  console.log('button clicked');
-
   axios.get(`/refresh/${gameId}`)
     .then((res) => {
       const { boardState } = res.data;

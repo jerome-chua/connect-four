@@ -12,7 +12,6 @@ export default function bindRoutes(app) {
   });
 
   app.post('/login', UsersController.login);
-  // app.put('/logout', UsersController.logout);
   app.get('/checkiflogin', UsersController.checkIfLogin);
   app.get('/users', UsersController.allOtherUsers);
 
